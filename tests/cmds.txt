@@ -14,6 +14,7 @@ json{}
 text{}
 .after-portlet
 .after
+.dtstart.updated
 :empty
 td:empty
 .navbox-list li:nth-child(1)
