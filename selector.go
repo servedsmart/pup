@@ -11,6 +11,16 @@ import (
 	"golang.org/x/net/html"
 )
 
+type GetTagFunc func(node *html.Node) string
+
+func StrictGetTag(node *html.Node) string {
+	return node.DataAtom.String()
+}
+
+func LooseGetTag(node *html.Node) string {
+	return node.Data
+}
+
 type Selector interface {
 	Match(node *html.Node) bool
 }
@@ -86,7 +96,7 @@ func (s CSSSelector) Match(node *html.Node) bool {
 		return false
 	}
 	if s.Tag != "" {
-		if s.Tag != node.DataAtom.String() {
+		if s.Tag != pupGetTagFunc(node) {
 			return false
 		}
 	}
