@@ -14,5 +14,4 @@ Running the `test` file (just a bash script) will run the tests and diff the
 output. If pup has changed at all since the last version, you'll see the sha1sums
 that changed and the commands that produced that change. 
 
-To overwrite the current sha1sums, just run `python run.py > expected_output.txt`
-
+To overwrite the current sha1sums, just run `./test -update`.
