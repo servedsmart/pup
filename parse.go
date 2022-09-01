@@ -21,6 +21,7 @@ var (
 	pupEscapeHTML    bool          = true
 	pupIndentString  string        = " "
 	pupDisplayer     Displayer     = TreeDisplayer{}
+	pupGetTagFunc    GetTagFunc    = LooseGetTag
 )
 
 // Parse the html while handling the charset
@@ -56,6 +57,7 @@ Flags
     -n --number        print number of elements selected
     -l --limit         restrict number of levels printed
     -p --plain         don't escape html
+    -s --strict        ignore non-standard HTML tags
     --pre              preserve preformatted text
     --charset          specify the charset for pup to use
     --version          display version
@@ -91,6 +93,8 @@ func ProcessFlags(cmds []string) (nonFlagCmds []string, err error) {
 			pupEscapeHTML = false
 		case "--pre":
 			pupPreformatted = true
+		case "-s", "--strict":
+			pupGetTagFunc = StrictGetTag
 		case "-f", "--file":
 			filename := cmds[i+1]
 			pupIn, err = os.Open(filename)
