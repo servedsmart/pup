@@ -77,7 +77,7 @@ type PseudoClass func(*html.Node) bool
 
 type CSSSelector struct {
 	Tag    string
-	Attrs  map[string]*regexp.Regexp
+	Attrs  map[string][]*regexp.Regexp
 	Pseudo PseudoClass
 }
 
@@ -90,12 +90,14 @@ func (s CSSSelector) Match(node *html.Node) bool {
 			return false
 		}
 	}
-	for attrKey, matcher := range s.Attrs {
+	for attrKey, _ := range s.Attrs {
 		matched := false
 		for _, attr := range node.Attr {
 			if attrKey == attr.Key {
-				if !matcher.MatchString(attr.Val) {
-					return false
+				for _, matcher := range s.Attrs[attrKey] {
+					if !matcher.MatchString(attr.Val) {
+						return false
+					}
 				}
 				matched = true
 				break
@@ -116,7 +118,7 @@ func (s CSSSelector) Match(node *html.Node) bool {
 func ParseSelector(cmd string) (selector CSSSelector, err error) {
 	selector = CSSSelector{
 		Tag:    "",
-		Attrs:  map[string]*regexp.Regexp{},
+		Attrs:  map[string][]*regexp.Regexp{},
 		Pseudo: nil,
 	}
 	var s scanner.Scanner
@@ -159,7 +161,7 @@ func ParseClassMatcher(selector *CSSSelector, s scanner.Scanner) error {
 	var class bytes.Buffer
 	defer func() {
 		regexpStr := `(\A|\s)` + regexp.QuoteMeta(class.String()) + `(\s|\z)`
-		selector.Attrs["class"] = regexp.MustCompile(regexpStr)
+		selector.Attrs["class"] = append(selector.Attrs["class"], regexp.MustCompile(regexpStr))
 	}()
 	for {
 		c := s.Next()
@@ -188,7 +190,7 @@ func ParseIdMatcher(selector *CSSSelector, s scanner.Scanner) error {
 	var id bytes.Buffer
 	defer func() {
 		regexpStr := `^` + regexp.QuoteMeta(id.String()) + `$`
-		selector.Attrs["id"] = regexp.MustCompile(regexpStr)
+		selector.Attrs["id"] = append(selector.Attrs["id"], regexp.MustCompile(regexpStr))
 	}()
 	for {
 		c := s.Next()
@@ -219,23 +221,25 @@ func ParseAttrMatcher(selector *CSSSelector, s scanner.Scanner) error {
 	hasMatchVal := false
 	matchType := '='
 	defer func() {
+		keystr := attrKey.String()
+		valstr := attrVal.String()
 		if hasMatchVal {
 			var regexpStr string
 			switch matchType {
 			case '=':
-				regexpStr = `^` + regexp.QuoteMeta(attrVal.String()) + `$`
+				regexpStr = `^` + regexp.QuoteMeta(valstr) + `$`
 			case '*':
-				regexpStr = regexp.QuoteMeta(attrVal.String())
+				regexpStr = regexp.QuoteMeta(valstr)
 			case '$':
-				regexpStr = regexp.QuoteMeta(attrVal.String()) + `$`
+				regexpStr = regexp.QuoteMeta(valstr) + `$`
 			case '^':
-				regexpStr = `^` + regexp.QuoteMeta(attrVal.String())
+				regexpStr = `^` + regexp.QuoteMeta(valstr)
 			case '~':
-				regexpStr = `(\A|\s)` + regexp.QuoteMeta(attrVal.String()) + `(\s|\z)`
+				regexpStr = `(\A|\s)` + regexp.QuoteMeta(valstr) + `(\s|\z)`
 			}
-			selector.Attrs[attrKey.String()] = regexp.MustCompile(regexpStr)
+			selector.Attrs[keystr] = append(selector.Attrs[keystr], regexp.MustCompile(regexpStr))
 		} else {
-			selector.Attrs[attrKey.String()] = regexp.MustCompile(`^.*$`)
+			selector.Attrs[keystr] = append(selector.Attrs[keystr], regexp.MustCompile(`^.*$`))
 		}
 	}()
 	// After reaching ']' proceed
