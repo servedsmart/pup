@@ -32,6 +32,7 @@ td:empty
 .summary
 [class=summary]
 [class="summary"]
+[keep:empty]
 #toc
 #toc li + a
 #toc li + a text{}
