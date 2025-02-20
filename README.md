@@ -138,6 +138,16 @@ $ cat robots.html | pup ':contains("History")'
 ```
 
 ```bash
+$ cat robots.html | pup ':matches("Histor*")'
+<span class="toctext">
+ History
+</span>
+<span class="mw-headline" id="History">
+ History
+</span>
+```
+
+```bash
 $ cat robots.html | pup ':parent-of([action="edit"])'
 <span class="wb-langlinks-edit wb-langlinks-link">
  <a action="edit" href="//www.wikidata.org/wiki/Q80776#sitelinks-wikipedia" text="Edit links" title="Edit interlanguage links" class="wbc-editpage">
@@ -211,6 +221,7 @@ pup ':last-of-type'
 pup ':only-child'
 pup ':only-of-type'
 pup ':contains("text")'
+pup ':matches("pattern")'
 pup ':nth-child(n)'
 pup ':nth-of-type(n)'
 pup ':nth-last-child(n)'

@@ -385,6 +385,11 @@ func ParsePseudo(selector *CSSSelector, s scanner.Scanner) error {
 		if err != nil {
 			return err
 		}
+	case strings.HasPrefix(cmd, "matches("):
+		selector.Pseudo, err = parseMatchesPseudo(cmd[len("matches("):])
+		if err != nil {
+			return err
+		}
 	case strings.HasPrefix(cmd, "nth-child("),
 		strings.HasPrefix(cmd, "nth-last-child("),
 		strings.HasPrefix(cmd, "nth-last-of-type("),
@@ -600,6 +605,55 @@ func parseContainsPseudo(cmd string) (PseudoClass, error) {
 			return nil, fmt.Errorf("Malformed 'contains(\"\")' selector")
 		default:
 			if _, err := textToContain.WriteRune(r); err != nil {
+				return nil, err
+			}
+		}
+	}
+}
+
+// Parse a :matches("") selector
+// expects the input to be a valid regexp that matches text
+func parseMatchesPseudo(cmd string) (PseudoClass, error) {
+	var s scanner.Scanner
+	s.Init(strings.NewReader(cmd))
+	switch s.Next() {
+	case '"':
+	default:
+		return nil, fmt.Errorf("Malformed 'matches(\"\")' selector")
+	}
+	pattern := bytes.NewBuffer([]byte{})
+	for {
+		r := s.Next()
+		switch r {
+		case '"':
+			// ')' then EOF must follow '"'
+			if s.Next() != ')' {
+				return nil, fmt.Errorf("Malformed 'matches(\"\")' selector")
+			}
+			if s.Next() != scanner.EOF {
+				return nil, fmt.Errorf("'matches(\"\")' must end selector")
+			}
+			p, err := regexp.Compile(pattern.String())
+			if err != nil {
+				return nil, err
+			}
+			contains := func(node *html.Node) bool {
+				for c := node.FirstChild; c != nil; c = c.NextSibling {
+					if c.Type == html.TextNode {
+						if p.MatchString(c.Data) {
+							return true
+						}
+					}
+				}
+				return false
+			}
+			return contains, nil
+		case '\\':
+			s.Next()
+		case scanner.EOF:
+			return nil, fmt.Errorf("Malformed 'contains(\"\")' selector")
+		default:
+			if _, err := pattern.WriteRune(r); err != nil {
 				return nil, err
 			}
 		}

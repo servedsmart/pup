@@ -49,3 +49,5 @@ link , a:parent-of(sup)
 link , a:parent-of(sup) sup
 li --number
 li -n
+p:contains("Rob")
+p:matches("Ro*")

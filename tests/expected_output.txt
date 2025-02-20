@@ -49,3 +49,5 @@ b6a3d6cccd305fcc3e8bf2743c443743bdaaa02b link , a:parent-of(sup)
 0d1f66765d1632c70f8608947890524e78459362 link , a:parent-of(sup) sup
 da39a3ee5e6b4b0d3255bfef95601890afd80709 li --number
 da39a3ee5e6b4b0d3255bfef95601890afd80709 li -n
+4c15ca8f190a4412469e487fab6f7ad2479f922f p:contains("Rob")
+da39a3ee5e6b4b0d3255bfef95601890afd80709 p:matches("Ro*")
