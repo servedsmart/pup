@@ -13,7 +13,7 @@ Direct downloads are available through the [releases page](https://github.com/Er
 
 If you have Go installed on your computer just run `go install`.
 
-    go install github.com/servedsmart/pup
+    go install github.com/servedsmart/pup@latest
 
 If you're on macOS or Linux, use [Homebrew](http://brew.sh/) to install (no Go required).
 
